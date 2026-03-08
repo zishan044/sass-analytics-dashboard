@@ -1,0 +1,15 @@
+# OS & IDEs (Global)
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs (Global)
+**/*.log
+logs/
+
+# Security (Catch-all for all .env files in any folder)
+**/.env*
