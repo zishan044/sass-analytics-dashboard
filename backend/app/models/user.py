@@ -1,8 +1,12 @@
-from sqlmodel import Field
+from sqlmodel import Field, Relationship
 from datetime import datetime
+from typing import TYPE_CHECKING
 from sqlalchemy import Column, DateTime, func
 
 from ..schemas import UserBase
+
+if TYPE_CHECKING:
+    from app.models.project import Project
 
 class User(UserBase, table=True):
     __tablename__ = "users"
@@ -17,3 +21,5 @@ class User(UserBase, table=True):
             nullable=False
         )
     )
+
+    projects: list["Project"] = Relationship(back_populates='owner')

@@ -1,5 +1,9 @@
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.schemas.project import ProjectRead
 
 class UserBase(SQLModel):
     username: str = Field(min_length=4, max_length=50)
@@ -10,6 +14,7 @@ class UserCreate(UserBase):
 
 class UserRead(UserBase):
     id: int
+    projects: list["ProjectRead"]
 
 class UserLogin(SQLModel):
     email: EmailStr
