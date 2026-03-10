@@ -19,3 +19,7 @@ class UserRead(UserBase):
 class UserLogin(SQLModel):
     email: EmailStr
     password: str
+
+from app.schemas.project import ProjectRead
+
+UserRead.model_rebuild()
