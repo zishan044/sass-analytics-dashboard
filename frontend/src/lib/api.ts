@@ -11,12 +11,25 @@ export type LoginData = {
   password: string;
 }
 
+export type Project = {
+  id: number;
+  name: string;
+  description: string | null;
+  created_at: string;
+  owner_id: number;
+};
+
 export type User = {
   id: number;
   username: string;
   email: string;
-}
+  projects?: Project[];
+};
 
+export type ProjectCreate = {
+  name: string;
+  description?: string;
+};
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
@@ -40,4 +53,9 @@ export const fetchCurrentUser = async (): Promise<User | null> => {
   } catch (error) {
     return null;
   }
+};
+
+export const createProject = async (data: ProjectCreate): Promise<Project> => {
+  const response = await api.post<Project>("/projects/", data);
+  return response.data;
 };
