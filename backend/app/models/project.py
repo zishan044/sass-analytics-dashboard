@@ -7,6 +7,7 @@ from ..schemas import ProjectBase
 
 if TYPE_CHECKING:
     from app.models.user import User
+    from app.models.event import Event
 
 class Project(ProjectBase, table=True):
     __tablename__ = "projects"
@@ -23,3 +24,5 @@ class Project(ProjectBase, table=True):
     
     owner_id: int = Field(foreign_key="users.id", nullable=False, ondelete="CASCADE")
     owner: "User" = Relationship(back_populates="projects")
+
+    events: list["Event"] = Relationship(back_populates='project')

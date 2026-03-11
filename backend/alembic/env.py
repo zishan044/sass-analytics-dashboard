@@ -10,7 +10,7 @@ import asyncio
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from dotenv import load_dotenv
 
-from app.models import User, Project
+from app.models import User, Project, Event
 
 load_dotenv()
 
