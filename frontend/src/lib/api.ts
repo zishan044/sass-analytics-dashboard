@@ -40,6 +40,18 @@ export interface AnalyticsEntry {
 export interface AnalyticsResponse {
   data: AnalyticsEntry[];
 }
+
+export interface EventCreate {
+  event_type: string;
+  value: number;
+}
+
+export interface EventBulkPayload {
+  project_id: number;
+  events: EventCreate[];
+}
+
+
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   withCredentials: true,
@@ -71,5 +83,10 @@ export const createProject = async (data: ProjectCreate): Promise<Project> => {
 
 export const fetchProjectAnalytics = async (projectId: number): Promise<AnalyticsResponse> => {
   const response = await api.get<AnalyticsResponse>(`/analytics/${projectId}`);
+  return response.data;
+};
+
+export const ingestEvents = async (payload: EventBulkPayload) => {
+  const response = await api.post('/events/', payload);
   return response.data;
 };
