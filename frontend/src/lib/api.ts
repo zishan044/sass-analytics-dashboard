@@ -31,6 +31,15 @@ export type ProjectCreate = {
   description?: string;
 };
 
+export interface AnalyticsEntry {
+  date: string;
+  events: number;
+  revenue: number;
+}
+
+export interface AnalyticsResponse {
+  data: AnalyticsEntry[];
+}
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   withCredentials: true,
@@ -57,5 +66,10 @@ export const fetchCurrentUser = async (): Promise<User | null> => {
 
 export const createProject = async (data: ProjectCreate): Promise<Project> => {
   const response = await api.post<Project>("/projects/", data);
+  return response.data;
+};
+
+export const fetchProjectAnalytics = async (projectId: number): Promise<AnalyticsResponse> => {
+  const response = await api.get<AnalyticsResponse>(`/analytics/${projectId}`);
   return response.data;
 };
