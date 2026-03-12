@@ -7,7 +7,9 @@ if TYPE_CHECKING:
 
 class UserBase(SQLModel):
     username: str = Field(min_length=4, max_length=50)
-    email: EmailStr = Field(unique=True, index=True) 
+    email: EmailStr = Field(unique=True, index=True)
+    subscription_status: str | None = Field(default='incomplete')
+    stripe_customer_id: str | None = Field(default=None)
 
 class UserCreate(UserBase):
     password: str = Field(min_length=8)
