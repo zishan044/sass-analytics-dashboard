@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AnalyticsChart } from "@/components/AnalyticsChart";
 import { CreateProjectModal } from "@/components/CreateProjectModal";
 import { TrafficSimulator } from "@/components/TrafficSimulator";
+import { ReportGenerator } from "@/components/ReportGenratorButton";
 
 export default function DashboardPage() {
   const { user, isLoading } = useUser();
@@ -75,7 +76,10 @@ export default function DashboardPage() {
 
             {/* Traffic Simulator Button */}
             {selectedProjectId && (
-              <TrafficSimulator projectId={selectedProjectId} />
+              <div className="flex gap-4">
+                <TrafficSimulator projectId={selectedProjectId} />
+                <ReportGenerator projectId={selectedProjectId} />
+              </div>
             )}
           </div>
 

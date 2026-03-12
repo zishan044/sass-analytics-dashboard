@@ -51,6 +51,20 @@ export interface EventBulkPayload {
   events: EventCreate[];
 }
 
+export type ReportStatusResponse = {
+  task_id: string;
+  status: "PENDING" | "STARTED" | "SUCCESS" | "FAILURE";
+  result: {
+    status: string;
+    file_path: string;
+  } | null;
+}
+
+export type GenerateReportResponse = {
+  task_id: string;
+  message: string;
+}
+
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
@@ -89,4 +103,12 @@ export const fetchProjectAnalytics = async (projectId: number): Promise<Analytic
 export const ingestEvents = async (payload: EventBulkPayload) => {
   const response = await api.post('/events/', payload);
   return response.data;
+};
+
+export const reportApi = {
+  generate: (projectId: number) => 
+    api.post<GenerateReportResponse>(`/reports/generate/${projectId}`).then(res => res.data),
+    
+  getStatus: (taskId: string) => 
+    api.get<ReportStatusResponse>(`/reports/status/${taskId}`).then(res => res.data),
 };
