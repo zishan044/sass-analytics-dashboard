@@ -23,6 +23,8 @@ export type User = {
   id: number;
   username: string;
   email: string;
+  subscription_status: 'incomplete' | 'active' | 'canceled'; // Matches your SQLModel default
+  stripe_customer_id: string | null;
   projects?: Project[];
 };
 
@@ -111,4 +113,14 @@ export const reportApi = {
     
   getStatus: (taskId: string) => 
     api.get<ReportStatusResponse>(`/reports/status/${taskId}`).then(res => res.data),
+};
+
+export const billingService = {
+
+  createCheckoutSession: async () => {
+    const { data } = await api.post<{ url: string }>("/billing/checkout-session");
+    return data.url;
+  },
+
+  isPro: (user: User | null) => user?.subscription_status === 'active',
 };
