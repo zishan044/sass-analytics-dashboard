@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     DATABASE_URL: str
+    REDIS_URL: str
 
     DEBUG: bool
 
