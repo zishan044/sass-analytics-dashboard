@@ -1,18 +1,29 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, status
 
-from ..core import get_current_user, manager
+from ..core import manager
 
-router = APIRouter()
+websocket_router = APIRouter()
 
-@router.websocket("/ws/{project_id}")
+@websocket_router.websocket("/ws/{project_id}")
 async def project_websocket_endpoint(
     websocket: WebSocket, 
     project_id: str,
-    user_id: str = Depends(get_current_user)
 ):
-    await manager.connect(websocket, project_id)
+    await websocket.accept()
+    
     try:
+        token = websocket.cookies.get("access_token")
+        if not token:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+        
+        manager.connect(websocket, project_id)
+        
         while True:
-            data = await websocket.receive_text()    
+            await websocket.receive_text()
+            
     except WebSocketDisconnect:
         manager.disconnect(websocket, project_id)
+    except Exception as e:
+        print(f"WS Error: {e}")
+        await websocket.close(code=status.WS_1011_INTERNAL_ERROR)

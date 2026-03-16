@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useUser } from "@/hooks/useUser";
+import { useWebsocket } from "@/hooks/useWebsocket";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useQueryClient } from "@tanstack/react-query";
 import { LayoutGrid, LineChart, Activity } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,12 +12,14 @@ import { AnalyticsChart } from "@/components/AnalyticsChart";
 import { CreateProjectModal } from "@/components/CreateProjectModal";
 import { TrafficSimulator } from "@/components/TrafficSimulator";
 import { ReportGenerator } from "@/components/ReportGenratorButton";
+import { WebSocketMessage, type AnalyticsResponse } from "@/lib/api";
 
 export default function DashboardPage() {
   const { user, isLoading } = useUser();
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
     null,
   );
+  const queryClient = useQueryClient();
 
   // Set default selected project once user loads
   if (!selectedProjectId && user?.projects?.length > 0) {
@@ -24,6 +28,39 @@ export default function DashboardPage() {
 
   const { data: analytics, isLoading: isStatsLoading } =
     useAnalytics(selectedProjectId);
+
+  const { isConnected } = useWebsocket(selectedProjectId as number, {
+    onMessage: (message: WebSocketMessage) => {
+      if (message.type === "NEW_EVENTS" && selectedProjectId) {
+        // Manually update the cache for the currently selected project
+        queryClient.setQueryData(
+          ["analytics", selectedProjectId],
+          (oldData: AnalyticsResponse | undefined) => {
+            if (!oldData) return oldData;
+
+            const updatedData = [...oldData.data];
+            if (updatedData.length > 0) {
+              const lastIndex = updatedData.length - 1;
+
+              // Calculate new totals for the "current day" (the last entry)
+              const addedRevenue = message.data.reduce(
+                (acc, curr) => acc + curr.value,
+                0,
+              );
+
+              updatedData[lastIndex] = {
+                ...updatedData[lastIndex],
+                events: updatedData[lastIndex].events + message.count,
+                revenue: updatedData[lastIndex].revenue + addedRevenue,
+              };
+            }
+
+            return { ...oldData, data: updatedData };
+          },
+        );
+      }
+    },
+  });
 
   if (isLoading)
     return (
@@ -79,6 +116,15 @@ export default function DashboardPage() {
               <div className="flex gap-4">
                 <TrafficSimulator projectId={selectedProjectId} />
                 <ReportGenerator projectId={selectedProjectId} />
+              </div>
+            )}
+
+            {selectedProjectId && (
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 text-xs font-medium">
+                <span
+                  className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-slate-400"}`}
+                />
+                {isConnected ? "LIVE" : "DISCONNECTED"}
               </div>
             )}
           </div>

@@ -23,7 +23,7 @@ export type User = {
   id: number;
   username: string;
   email: string;
-  subscription_status: 'incomplete' | 'active' | 'canceled'; // Matches your SQLModel default
+  subscription_status: 'incomplete' | 'active' | 'canceled';
   stripe_customer_id: string | null;
   projects?: Project[];
 };
@@ -67,6 +67,13 @@ export type GenerateReportResponse = {
   message: string;
 }
 
+export interface WebSocketMessage {
+  type: 'NEW_EVENTS';
+  count: number;
+  data: EventCreate[];
+}
+
+export const WS_BASE_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
@@ -124,3 +131,5 @@ export const billingService = {
 
   isPro: (user: User | null) => user?.subscription_status === 'active',
 };
+
+export const getWsUrl = (projectId: number | string) => `${WS_BASE_URL}/ws/${projectId}`;

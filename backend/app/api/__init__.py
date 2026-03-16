@@ -4,3 +4,4 @@ from .analytics import analytics_router
 from .event import event_router
 from .reports import reports_router
 from .billing import billing_router
+from .websockets import websocket_router
