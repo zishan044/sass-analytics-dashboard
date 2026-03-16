@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from ..core import get_session, get_current_user
+from ..core import get_session, get_current_user, manager
 from ..models import Event, Project, User
 from ..schemas import EventCreateBulk
 
@@ -38,6 +38,14 @@ async def ingest_events(
     try:
         session.add_all(db_events) 
         await session.commit()
+
+        event_data = [event.model_dump() for event in events_payload.events]
+        
+        await manager.broadcast({
+            "type": "NEW_EVENTS",
+            "count": len(event_data),
+            "data": event_data
+        }, str(events_payload.project_id))
         
     except Exception as e:
         await session.rollback()

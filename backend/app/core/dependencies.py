@@ -1,4 +1,5 @@
-from fastapi import Request, HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends
+from starlette.requests import HTTPConnection
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,8 +7,8 @@ from .jwt import decode_access_token
 from .database import get_session
 from ..models import User
 
-def get_token_from_cookie(request: Request) -> str:
-    token = request.cookies.get("access_token")
+def get_token_from_cookie(connection: HTTPConnection) -> str:
+    token = connection.cookies.get("access_token")
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 
